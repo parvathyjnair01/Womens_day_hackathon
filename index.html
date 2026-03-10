@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SheShield – Women's Safety & Cyber Protection</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rose:    #e8476a;
+  --rose-lt: #ff6b8a;
+  --rose-dk: #b5294a;
+  --navy:    #0d1b2a;
+  --navy-md: #162032;
+  --navy-lt: #1e2f44;
+  --cream:   #fff5f7;
+  --gold:    #f5c842;
+  --text:    #f0e8ec;
+  --muted:   #8fa0b0;
+  --glass:   rgba(255,255,255,0.05);
+  --glass-b: rgba(255,255,255,0.1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  background: var(--navy);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-x: hidden;
+}
+
+/* ── Aurora background ── */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(232,71,106,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(74,144,226,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(245,200,66,0.05) 0%, transparent 60%),
+    var(--navy);
+  pointer-events:none;
+}
+
+.app-wrap {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 460px;
+}
+
+/* ── Cards ── */
+.glass-card {
+  background: rgba(22,32,50,0.8);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(232,71,106,0.2);
+  border-radius: 28px;
+  padding: 36px 32px;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  animation: slideUp 0.5s cubic-bezier(.16,1,.3,1) both;
+}
+
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(30px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Logo ── */
+.logo-block {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.logo-ring {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose), var(--rose-dk));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px;
+  box-shadow: 0 0 0 8px rgba(232,71,106,0.12), 0 0 40px rgba(232,71,106,0.3);
+  font-size: 2rem;
+  animation: pulse-ring 3s ease-in-out infinite;
+}
+@keyframes pulse-ring {
+  0%,100% { box-shadow: 0 0 0 8px rgba(232,71,106,0.12), 0 0 40px rgba(232,71,106,0.3); }
+  50%      { box-shadow: 0 0 0 16px rgba(232,71,106,0.06), 0 0 60px rgba(232,71,106,0.5); }
+}
+.logo-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 30%, var(--rose-lt) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+.logo-sub {
+  font-size: 0.82rem;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ── Tabs ── */
+.tab-bar {
+  display: flex;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 50px;
+  padding: 5px;
+  margin-bottom: 28px;
+  gap: 4px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: 44px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.tab-btn.active {
+  background: var(--rose);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(232,71,106,0.4);
+}
+
+/* ── Inputs ── */
+.field {
+  margin-bottom: 18px;
+}
+.field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+.field input, .field textarea {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.25s;
+}
+.field input::placeholder { color: rgba(255,255,255,0.25); }
+.field input:focus {
+  outline: none;
+  border-color: var(--rose);
+  background: rgba(232,71,106,0.08);
+  box-shadow: 0 0 0 3px rgba(232,71,106,0.15);
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--rose), var(--rose-dk));
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 8px 24px rgba(232,71,106,0.35);
+  position: relative; overflow: hidden;
+}
+.btn-primary::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(232,71,106,0.5); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  color: var(--rose-lt);
+  border: 1px solid rgba(232,71,106,0.4);
+  border-radius: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-ghost:hover { background: rgba(232,71,106,0.1); }
+
+.btn-sos {
+  background: linear-gradient(135deg, #ff3333, #b00);
+  box-shadow: 0 0 0 0 rgba(255,51,51,0.4);
+  animation: sos-pulse 2s infinite;
+}
+@keyframes sos-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255,51,51,0.5); }
+  70%  { box-shadow: 0 0 0 18px rgba(255,51,51,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,51,51,0); }
+}
+
+/* ── Photo upload ── */
+.photo-upload {
+  border: 2px dashed rgba(232,71,106,0.35);
+  border-radius: 20px;
+  padding: 22px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  margin-bottom: 20px;
+  background: rgba(232,71,106,0.04);
+}
+.photo-upload:hover { border-color: var(--rose); background: rgba(232,71,106,0.1); }
+.photo-upload img.preview-img {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--rose);
+  margin-bottom: 8px;
+  box-shadow: 0 0 20px rgba(232,71,106,0.4);
+}
+.photo-upload p { color: var(--muted); font-size: 0.85rem; }
+
+/* ── Hidden / sections ── */
+.hidden { display: none !important; }
+.section { animation: slideUp 0.45s cubic-bezier(.16,1,.3,1) both; }
+
+/* ── Dashboard header ── */
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.user-info { display: flex; align-items: center; gap: 12px; }
+.user-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--rose);
+  box-shadow: 0 0 18px rgba(232,71,106,0.4);
+}
+.user-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+.status-dot {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; color: #4ade80;
+  background: rgba(74,222,128,0.12);
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(74,222,128,0.25);
+}
+.status-dot::before {
+  content:'';
+  width:6px; height:6px;
+  border-radius:50%; background:#4ade80;
+  animation: blink 1.5s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.logout-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--muted);
+  padding: 9px 16px;
+  border-radius: 40px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.logout-btn:hover { background: rgba(232,71,106,0.15); color: var(--rose-lt); border-color: var(--rose); }
+
+/* ── Feature grid ── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.feat-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 22px;
+  padding: 22px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative; overflow: hidden;
+}
+.feat-card::before {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg, var(--c1,transparent), var(--c2,transparent));
+  opacity:0; transition: opacity 0.3s;
+}
+.feat-card:hover { transform: translateY(-3px); border-color: rgba(232,71,106,0.4); }
+.feat-card:hover::before { opacity:1; }
+.feat-card.cyber   { --c1: rgba(232,71,106,0.12); --c2: rgba(232,71,106,0.04); }
+.feat-card.legal   { --c1: rgba(74,144,226,0.12); --c2: rgba(74,144,226,0.04); }
+.feat-card.travel  { --c1: rgba(74,222,128,0.12); --c2: rgba(74,222,128,0.04); }
+.feat-card.sos     { --c1: rgba(255,51,51,0.18);  --c2: rgba(255,51,51,0.06); }
+.feat-icon { font-size: 2.4rem; margin-bottom: 8px; }
+.feat-label { font-weight: 600; font-size: 0.88rem; color: var(--text); position:relative; }
+.feat-sub { font-size: 0.72rem; color: var(--muted); margin-top: 3px; position:relative; }
+
+/* ── Dynamic content panel ── */
+.dynamic-panel {
+  background: rgba(22,32,50,0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 24px;
+  animation: slideUp 0.35s cubic-bezier(.16,1,.3,1) both;
+}
+.panel-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── Chat ── */
+.chat-messages {
+  background: rgba(0,0,0,0.25);
+  border-radius: 18px;
+  padding: 16px;
+  height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: rgba(232,71,106,0.3); border-radius:4px; }
+
+.msg {
+  max-width: 82%;
+  padding: 11px 16px;
+  border-radius: 18px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  animation: msgIn 0.3s ease;
+}
+@keyframes msgIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.msg.user {
+  align-self: flex-end;
+  background: var(--rose);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+}
+.msg.bot {
+  align-self: flex-start;
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  border-bottom-left-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.typing-dots {
+  display: flex; gap: 4px;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 18px; border-bottom-left-radius:5px;
+  width: fit-content;
+}
+.typing-dots span {
+  width:7px; height:7px; background: var(--muted); border-radius:50%;
+  animation: bounce 1.4s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay:.2s; }
+.typing-dots span:nth-child(3) { animation-delay:.4s; }
+@keyframes bounce {
+  0%,60%,100% { transform:translateY(0); opacity:.5; }
+  30% { transform:translateY(-6px); opacity:1; }
+}
+
+.chat-input-row {
+  display: flex; gap: 10px; align-items: center;
+}
+.chat-input-row input {
+  flex:1; padding: 13px 18px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 40px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  transition: all 0.25s;
+}
+.chat-input-row input::placeholder { color: rgba(255,255,255,0.25); }
+.chat-input-row input:focus { outline:none; border-color: var(--rose); box-shadow: 0 0 0 3px rgba(232,71,106,0.15); }
+.chat-send-btn {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--rose);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1rem;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(232,71,106,0.4);
+}
+.chat-send-btn:hover { transform: scale(1.08); }
+
+/* ── Progress ── */
+.progress-bar {
+  width: 100%; height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 20px; overflow: hidden;
+  margin: 12px 0;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--rose), var(--rose-lt));
+  width: 0%;
+  transition: width 0.2s;
+  border-radius: 20px;
+}
+
+/* ── Alert boxes ── */
+.alert-danger {
+  background: rgba(255,51,51,0.08);
+  border: 1px solid rgba(255,51,51,0.3);
+  border-left: 4px solid #ff3333;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin: 12px 0;
+}
+.alert-safe {
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.3);
+  border-left: 4px solid #4ade80;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin: 12px 0;
+}
+.alert-info {
+  background: rgba(74,144,226,0.08);
+  border: 1px solid rgba(74,144,226,0.3);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin: 12px 0;
+}
+
+/* ── Emergency contacts (setup) ── */
+.contact-row {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 12px;
+  background: rgba(255,255,255,0.04);
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.contact-row input {
+  flex:1; padding: 11px 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+}
+.contact-row input::placeholder { color: rgba(255,255,255,0.25); }
+.contact-row input:focus { outline:none; border-color: var(--rose); }
+.contact-row .del-btn {
+  background: none; border: none; color: rgba(255,255,255,0.25);
+  font-size: 1.3rem; cursor: pointer; transition: color 0.2s;
+  padding: 4px 6px; flex-shrink:0;
+}
+.contact-row .del-btn:hover { color: #ff3333; }
+
+/* ── Map ── */
+.map-wrap {
+  height: 170px;
+  border-radius: 18px;
+  overflow: hidden;
+  margin: 14px 0;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ── Bottom nav ── */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 20px;
+  background: rgba(22,32,50,0.9);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 10px 0;
+  border-radius: 60px;
+  backdrop-filter: blur(20px);
+}
+.nav-pill {
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 9px 18px;
+  border-radius: 40px;
+  transition: all 0.25s;
+  color: var(--muted);
+}
+.nav-pill.active {
+  background: var(--rose);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(232,71,106,0.4);
+}
+.nav-pill:hover:not(.active) { background: rgba(255,255,255,0.06); color: var(--text); }
+
+/* ── SOS big button ── */
+.sos-big {
+  width: 130px; height: 130px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff4444, #b00020);
+  border: none;
+  color: #fff;
+  font-size: 3rem;
+  cursor: pointer;
+  margin: 20px auto;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 0 rgba(255,68,68,0.5);
+  animation: sos-ring 1.8s infinite;
+  transition: transform 0.15s;
+}
+.sos-big:active { transform: scale(0.95); }
+@keyframes sos-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(255,68,68,0.5); }
+  70%  { box-shadow: 0 0 0 24px rgba(255,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,68,68,0); }
+}
+
+/* ── Cyber scan center ── */
+.scan-photo {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--rose);
+  box-shadow: 0 0 30px rgba(232,71,106,0.4);
+  display: block; margin: 0 auto 12px;
+}
+
+/* ── Divider ── */
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; color: var(--muted); font-size:0.8rem;
+}
+.divider::before, .divider::after {
+  content:''; flex:1; height:1px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* ── Small note ── */
+.small-note { font-size:0.77rem; color:var(--muted); margin-top:6px; text-align:center; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(232,71,106,0.3); border-radius:4px; }
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .glass-card { padding: 28px 20px; border-radius: 22px; }
+}
+</style>
+</head>
+<body>
+<div class="app-wrap">
+
+  <!-- ═══ AUTH SECTION ═══ -->
+  <div id="authSection" class="section">
+    <div class="glass-card">
+      <div class="logo-block">
+        <div class="logo-ring">🛡️</div>
+        <div class="logo-title">SheShield</div>
+        <div class="logo-sub">Your trusted safety companion</div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" id="loginTab"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+        <button class="tab-btn" id="signupTab"><i class="fas fa-user-plus"></i> Sign Up</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginForm">
+        <div class="field">
+          <label><i class="far fa-envelope"></i> Email Address</label>
+          <input type="email" id="loginEmail" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label><i class="fas fa-lock"></i> Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••">
+        </div>
+        <div class="field" style="margin-bottom:20px;">
+          <div style="text-align:right; margin-top:-8px; margin-bottom:4px;">
+            <span style="font-size:0.8rem; color:var(--rose-lt); cursor:pointer;">Forgot password?</span>
+          </div>
+        </div>
+        <button class="btn-primary" id="loginBtn"><i class="fas fa-arrow-right"></i> Sign In Securely</button>
+        <p class="small-note" style="margin-top:16px;"><i class="fas fa-lock"></i> End-to-end encrypted · Your data stays private</p>
+      </div>
+
+      <!-- Signup Form -->
+      <div id="signupForm" class="hidden">
+        <div class="photo-upload" id="dragArea">
+          <img id="signupPreview" class="preview-img" src="https://via.placeholder.com/80?text=%F0%9F%93%B7" alt="photo">
+          <p><i class="fas fa-cloud-upload-alt" style="color:var(--rose-lt);"></i> Drag & drop or click to upload your photo</p>
+          <input type="file" id="signupPhoto" accept="image/*" style="display:none;">
+        </div>
+        <div class="field">
+          <label><i class="fas fa-user"></i> Full Name</label>
+          <input type="text" id="signupName" placeholder="Priya Sharma">
+        </div>
+        <div class="field">
+          <label><i class="far fa-envelope"></i> Email Address</label>
+          <input type="email" id="signupEmail" placeholder="priya@example.com">
+        </div>
+        <div class="field">
+          <label><i class="fas fa-phone-alt"></i> Phone Number</label>
+          <input type="tel" id="signupPhone" placeholder="+91 98765 43210">
+        </div>
+        <div class="field">
+          <label><i class="fas fa-lock"></i> Create Password</label>
+          <input type="password" id="signupPassword" placeholder="••••••••">
+        </div>
+        <button class="btn-primary" id="signupBtn"><i class="fas fa-user-check"></i> Create My Account</button>
+        <p class="small-note" style="margin-top:14px;"><i class="fas fa-shield-alt"></i> SheShield protects your digital identity</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PROFILE SETUP ═══ -->
+  <div id="profileSetupSection" class="section hidden">
+    <div class="glass-card">
+      <div style="margin-bottom:24px;">
+        <div class="logo-title" style="font-size:1.8rem; margin-bottom:4px;">Almost there! <span style="-webkit-text-fill-color:#f5c842;">✨</span></div>
+        <p style="color:var(--muted); font-size:0.88rem;">Add emergency contacts who'll be notified during an SOS alert.</p>
+      </div>
+      <div id="contactsContainer"></div>
+      <button class="btn-ghost" id="addContactBtn" style="margin:12px 0 20px;"><i class="fas fa-plus-circle"></i> Add Contact</button>
+      <button class="btn-primary" id="finishProfileBtn"><i class="fas fa-arrow-right"></i> Go to Dashboard</button>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div id="dashboardSection" class="section hidden">
+    <div class="dash-header">
+      <div class="user-info">
+        <img id="dashboardPhoto" class="user-avatar" src="" alt="">
+        <div>
+          <div class="user-name" id="dashboardName"></div>
+          <div class="status-dot">Protected</div>
+        </div>
+      </div>
+      <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feat-card cyber" id="cyberCard">
+        <div class="feat-icon">🛡️</div>
+        <div class="feat-label">Cyber Safety</div>
+        <div class="feat-sub">Scan for misuse</div>
+      </div>
+      <div class="feat-card legal" id="legalCard">
+        <div class="feat-icon">⚖️</div>
+        <div class="feat-label">Legal Help</div>
+        <div class="feat-sub">AI assistant</div>
+      </div>
+      <div class="feat-card travel" id="travelCard">
+        <div class="feat-icon">🗺️</div>
+        <div class="feat-label">Travel Safety</div>
+        <div class="feat-sub">Share location</div>
+      </div>
+      <div class="feat-card sos" id="sosCard">
+        <div class="feat-icon">🚨</div>
+        <div class="feat-label">Emergency SOS</div>
+        <div class="feat-sub">Alert contacts</div>
+      </div>
+    </div>
+
+    <div class="dynamic-panel" id="dynamicView">
+      <div style="text-align:center; padding:12px 0;">
+        <div style="font-size:2.2rem; margin-bottom:8px;">👋</div>
+        <p style="color:var(--muted); font-size:0.9rem;">Select a feature above to get started.</p>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <span class="nav-pill active" data-view="home"><i class="fas fa-home"></i></span>
+      <span class="nav-pill" data-view="cyber"><i class="fas fa-shield-alt"></i></span>
+      <span class="nav-pill" data-view="legal"><i class="fas fa-gavel"></i></span>
+      <span class="nav-pill" data-view="travel"><i class="fas fa-map-marked-alt"></i></span>
+      <span class="nav-pill" data-view="sos"><i class="fas fa-exclamation-triangle"></i></span>
+    </div>
+  </div>
+
+</div><!-- .app-wrap -->
+
+<script>
+(function() {
+  let users = [];
+  function loadUsers() {
+    try { users = JSON.parse(localStorage.getItem('ssUsers') || '[]'); } catch(e) { users = []; }
+  }
+  function saveUsers() { localStorage.setItem('ssUsers', JSON.stringify(users)); }
+
+  let currentUser = null;
+
+  // sections
+  const authS    = document.getElementById('authSection');
+  const profileS = document.getElementById('profileSetupSection');
+  const dashS    = document.getElementById('dashboardSection');
+
+  function showSection(s) {
+    [authS, profileS, dashS].forEach(x => x.classList.add('hidden'));
+    s.classList.remove('hidden');
+  }
+
+  // tabs
+  const loginTab = document.getElementById('loginTab');
+  const signupTab= document.getElementById('signupTab');
+  const loginForm= document.getElementById('loginForm');
+  const signupForm=document.getElementById('signupForm');
+
+  loginTab.onclick = () => {
+    loginTab.classList.add('active'); signupTab.classList.remove('active');
+    loginForm.classList.remove('hidden'); signupForm.classList.add('hidden');
+  };
+  signupTab.onclick = () => {
+    signupTab.classList.add('active'); loginTab.classList.remove('active');
+    signupForm.classList.remove('hidden'); loginForm.classList.add('hidden');
+  };
+
+  // photo upload
+  const dragArea = document.getElementById('dragArea');
+  const signupPhoto = document.getElementById('signupPhoto');
+  const signupPreview = document.getElementById('signupPreview');
+
+  dragArea.onclick = () => signupPhoto.click();
+  dragArea.ondragover = e => { e.preventDefault(); dragArea.style.borderColor='var(--rose)'; };
+  dragArea.ondragleave = () => dragArea.style.borderColor='';
+  dragArea.ondrop = e => {
+    e.preventDefault(); dragArea.style.borderColor='';
+    const f = e.dataTransfer.files[0];
+    if (f && f.type.startsWith('image/')) signupPreview.src = URL.createObjectURL(f);
+  };
+  signupPhoto.onchange = e => {
+    const f = e.target.files[0];
+    if (f) signupPreview.src = URL.createObjectURL(f);
+  };
+
+  // login
+  document.getElementById('loginBtn').onclick = () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPassword').value.trim();
+    if (!email || !pass) return toast('Please enter email and password.');
+    loadUsers();
+    const u = users.find(u => u.email===email && u.password===pass);
+    if (u) { currentUser = u; showDashboard(); }
+    else {
+      if (confirm('No account found. Sign up?')) {
+        signupTab.click();
+        document.getElementById('signupEmail').value = email;
+      }
+    }
+  };
+
+  // signup
+  document.getElementById('signupBtn').onclick = () => {
+    const name  = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const phone = document.getElementById('signupPhone').value.trim();
+    const pass  = document.getElementById('signupPassword').value.trim();
+    const photo = signupPreview.src;
+    if (!name||!email||!phone||!pass||photo.includes('placeholder')) return toast('Please fill all fields and upload a photo.');
+    loadUsers();
+    if (users.some(u=>u.email===email)) { toast('Email already registered.'); loginTab.click(); return; }
+    const u = { email, password:pass, name, phone, photo, contacts:[] };
+    users.push(u); saveUsers(); currentUser = u;
+    contactList = [{ name:'', phone:'' }]; renderContacts();
+    showSection(profileS);
+  };
+
+  // contacts
+  let contactList = [{ name:'', phone:'' }];
+  const contactsContainer = document.getElementById('contactsContainer');
+
+  function renderContacts() {
+    contactsContainer.innerHTML = '';
+    contactList.forEach((c, i) => {
+      const row = document.createElement('div');
+      row.className = 'contact-row';
+
+      const ni = document.createElement('input');
+      ni.type='text'; ni.placeholder='Name'; ni.value=c.name;
+      ni.oninput = e => contactList[i].name = e.target.value;
+
+      const pi = document.createElement('input');
+      pi.type='tel'; pi.placeholder='Phone'; pi.value=c.phone;
+      pi.oninput = e => contactList[i].phone = e.target.value;
+
+      const db = document.createElement('button');
+      db.className='del-btn'; db.innerHTML='<i class="fas fa-times-circle"></i>';
+      db.onclick = () => { if(contactList.length>1){ contactList.splice(i,1); renderContacts(); } };
+
+      row.append(ni, pi, db);
+      contactsContainer.appendChild(row);
+    });
+  }
+
+  document.getElementById('addContactBtn').onclick = () => {
+    contactList.push({name:'',phone:''}); renderContacts();
+  };
+
+  document.getElementById('finishProfileBtn').onclick = () => {
+    const valid = contactList.filter(c=>c.name.trim()&&c.phone.trim());
+    if (!valid.length) return toast('Add at least one emergency contact.');
+    currentUser.contacts = valid;
+    const idx = users.findIndex(u=>u.email===currentUser.email);
+    if (idx!==-1) { users[idx].contacts=valid; saveUsers(); }
+    showDashboard();
+  };
+
+  // dashboard
+  function showDashboard() {
+    document.getElementById('dashboardName').textContent = currentUser.name;
+    document.getElementById('dashboardPhoto').src = currentUser.photo;
+    showSection(dashS);
+    showView('home');
+  }
+
+  document.getElementById('logoutBtn').onclick = () => { currentUser=null; showSection(authS); };
+
+  // feature cards
+  document.getElementById('cyberCard').onclick  = () => showView('cyber');
+  document.getElementById('legalCard').onclick  = () => showView('legal');
+  document.getElementById('travelCard').onclick = () => showView('travel');
+  document.getElementById('sosCard').onclick    = () => showView('sos');
+
+  document.querySelectorAll('.nav-pill').forEach(n => {
+    n.onclick = () => showView(n.dataset.view);
+  });
+
+  function showView(view) {
+    const panel = document.getElementById('dynamicView');
+    document.querySelectorAll('.nav-pill').forEach(n => {
+      n.classList.toggle('active', n.dataset.view===view);
+    });
+
+    if (view==='home') {
+      panel.innerHTML = `
+        <div style="text-align:center; padding:8px 0;">
+          <div style="font-size:2rem; margin-bottom:10px;">👋</div>
+          <div style="font-family:'Playfair Display',serif; font-size:1.1rem; color:#fff; margin-bottom:6px;">Welcome back, ${currentUser.name}</div>
+          <p style="color:var(--muted); font-size:0.86rem; line-height:1.6;">Your safety profile is active and your emergency contacts are ready.</p>
+        </div>`;
+
+    } else if (view==='cyber') {
+      panel.innerHTML = `
+        <div class="panel-title">🛡️ Cyber Safety</div>
+        <p style="color:var(--muted); font-size:0.85rem; margin-bottom:14px;">We'll scan the internet for unauthorized use of your photo.</p>
+        <img src="${currentUser.photo}" class="scan-photo" alt="">
+        <div class="progress-bar" id="scanBar" style="display:none;"><div class="progress-fill" id="scanFill"></div></div>
+        <button class="btn-ghost" id="scanBtn"><i class="fas fa-search"></i> Scan Internet for Misuse</button>
+        <div id="scanResult" class="hidden" style="margin-top:12px;"></div>`;
+      document.getElementById('scanBtn').onclick = doScan;
+
+    } else if (view==='legal') {
+      panel.innerHTML = `
+        <div class="panel-title">⚖️ Legal Assistant</div>
+        <div class="chat-messages" id="chatBox">
+          <div class="msg bot"><i class="fas fa-robot" style="margin-right:5px; color:var(--rose-lt);"></i> Hello! Ask me about cyber harassment, image misuse, or your legal rights.</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Type your question…">
+          <button class="chat-send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>`;
+      setupChat();
+
+    } else if (view==='travel') {
+      const contacts = (currentUser.contacts||[]).map(c=>`<li style="margin:5px 0;"><i class="fas fa-user" style="color:var(--rose-lt);margin-right:5px;"></i>${c.name} <span style="color:var(--muted)">(${c.phone})</span></li>`).join('') || '<li style="color:var(--muted);">No contacts saved.</li>';
+      panel.innerHTML = `
+        <div class="panel-title">🗺️ Travel Safety</div>
+        <div id="travelOff">
+          <p style="color:var(--muted); font-size:0.85rem; margin-bottom:14px;">Activating will share your real-time location with your emergency contacts.</p>
+          <ul style="padding-left:4px; margin-bottom:16px;">${contacts}</ul>
+          <button class="btn-ghost" id="activateTravel"><i class="fas fa-play"></i> Activate Travel Safety</button>
+        </div>
+        <div id="travelOn" class="hidden">
+          <div class="alert-safe"><i class="fas fa-check-circle" style="color:#4ade80;"></i> <strong>Active</strong> – location shared with your contacts.</div>
+          <div class="map-wrap" id="mapDiv"></div>
+        </div>`;
+      document.getElementById('activateTravel').onclick = doTravel;
+
+    } else if (view==='sos') {
+      panel.innerHTML = `
+        <div class="panel-title" style="color:#ff6b6b;">🚨 Emergency SOS</div>
+        <p style="color:var(--muted); font-size:0.84rem; text-align:center; margin-bottom:4px;">Press to alert your contacts and authorities.</p>
+        <button class="sos-big" id="sosBigBtn"><i class="fas fa-bell"></i></button>
+        <div class="alert-info" style="text-align:center;">
+          <i class="fas fa-phone-alt" style="color:#4a90e2;"></i>
+          <strong style="font-size:0.9rem; display:block; margin:4px 0;">Helpline Numbers</strong>
+          <span style="font-size:0.83rem; color:var(--muted);">112 (Police) · 1091 (Women) · 1930 (Cyber)</span>
+        </div>`;
+      document.getElementById('sosBigBtn').onclick = triggerSOS;
+    }
+  }
+
+  // ── Cyber scan ──
+  function doScan() {
+    const btn = document.getElementById('scanBtn');
+    const bar = document.getElementById('scanBar');
+    const fill= document.getElementById('scanFill');
+    const res = document.getElementById('scanResult');
+    bar.style.display='block'; btn.disabled=true;
+    btn.innerHTML='<i class="fas fa-spinner fa-pulse"></i> Scanning…';
+    res.classList.add('hidden');
+    let w=0;
+    const iv = setInterval(()=>{
+      w+=4; fill.style.width=w+'%';
+      if(w>=100){
+        clearInterval(iv);
+        setTimeout(()=>{
+          bar.style.display='none'; btn.disabled=false;
+          btn.innerHTML='<i class="fas fa-redo"></i> Scan Again';
+          res.innerHTML=`
+            <div class="alert-danger">
+              <p><strong><i class="fas fa-exclamation-circle" style="color:#ff4444;"></i> Misuse Detected!</strong></p>
+              <p style="font-size:0.85rem; margin:6px 0; color:var(--muted);">Your image was found on a social media profile with inappropriate comments. Classification: <em>Non-consensual sharing</em></p>
+              <hr style="border:none; border-top:1px solid rgba(255,255,255,0.08); margin:10px 0;">
+              <p style="font-size:0.88rem; font-weight:600;">Was this uploaded with your consent?</p>
+              <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+                <button class="btn-ghost" id="consentY" style="flex:1; padding:11px;"><i class="fas fa-check"></i> Yes</button>
+                <button class="btn-primary" id="consentN" style="flex:1; padding:11px;"><i class="fas fa-times"></i> No – Help me</button>
+              </div>
+              <div id="legal"></div>
+            </div>`;
+          res.classList.remove('hidden');
+          document.getElementById('consentY').onclick=()=>{
+            document.getElementById('legal').innerHTML='<div class="alert-safe" style="margin-top:10px;">✅ Marked as safe. No further action needed.</div>';
+          };
+          document.getElementById('consentN').onclick=()=>{
+            document.getElementById('legal').innerHTML=`
+              <div style="margin-top:10px; background:rgba(232,71,106,0.07); border:1px solid rgba(232,71,106,0.2); border-radius:14px; padding:14px;">
+                <p style="font-weight:600; margin-bottom:8px;"><i class="fas fa-gavel" style="color:var(--rose-lt);"></i> What you can do:</p>
+                <ul style="padding-left:18px; font-size:0.85rem; color:var(--muted); line-height:2;">
+                  <li>📸 Screenshot everything as evidence</li>
+                  <li>🚫 Don't confront the offender directly</li>
+                  <li>📞 Report at <strong style="color:var(--text);">cybercrime.gov.in</strong> or call 1930</li>
+                  <li>⚖️ IT Act & IPC cover non-consensual sharing</li>
+                  <li>🛡️ Request platform removal immediately</li>
+                </ul>
+              </div>`;
+          };
+        },400);
+      }
+    },30);
+  }
+
+  // ── Chat ──
+  function setupChat() {
+    const box = document.getElementById('chatBox');
+    const inp = document.getElementById('chatInput');
+    const btn = document.getElementById('sendBtn');
+    function addMsg(text,role) {
+      const d=document.createElement('div');
+      d.className='msg '+role;
+      d.innerHTML=role==='bot'?`<i class="fas fa-robot" style="color:var(--rose-lt);margin-right:4px;"></i>${text}`:text;
+      box.appendChild(d); box.scrollTop=9999;
+    }
+    function typing() {
+      const d=document.createElement('div'); d.className='typing-dots'; d.id='typing';
+      d.innerHTML='<span></span><span></span><span></span>'; box.appendChild(d); box.scrollTop=9999;
+    }
+    function botReply(q){
+      q=q.toLowerCase();
+      if(q.includes('photo')||q.includes('image')||q.includes('misuse'))
+        return 'If your photo was shared without consent, save evidence first, then report at cybercrime.gov.in. You can file under IPC 354C/509. I can guide you further.';
+      if(q.includes('harass')||q.includes('cyber'))
+        return 'Cyber harassment is a serious crime. Block the person, collect screenshots, and file a complaint at cybercrime.gov.in or dial 1930.';
+      if(q.includes('right'))
+        return 'You have a fundamental right to dignity and privacy. The IT Act and IPC protect against online abuse, non-consensual image sharing, and harassment.';
+      if(q.includes('fir')||q.includes('police'))
+        return 'You can file a cyber crime FIR at the nearest police station or online at cybercrime.gov.in. Take screenshots as evidence before reporting.';
+      return 'I\'m here to help. Ask me about photo misuse, harassment, your legal rights, or how to file a complaint.';
+    }
+    function send() {
+      const t=inp.value.trim(); if(!t)return;
+      addMsg(t,'user'); inp.value=''; typing();
+      setTimeout(()=>{ document.getElementById('typing')?.remove(); addMsg(botReply(t),'bot'); },1400);
+    }
+    btn.onclick=send; inp.onkeypress=e=>{ if(e.key==='Enter')send(); };
+  }
+
+  // ── Travel ──
+  function doTravel() {
+    document.getElementById('travelOff').classList.add('hidden');
+    document.getElementById('travelOn').classList.remove('hidden');
+    const initMap=(lat,lng,label)=>{
+      const m=L.map('mapDiv').setView([lat,lng],13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(m);
+      L.marker([lat,lng]).addTo(m).bindPopup(label).openPopup();
+    };
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        p=>initMap(p.coords.latitude,p.coords.longitude,'You are here'),
+        ()=>initMap(28.6139,77.2090,'Simulated (New Delhi)')
+      );
+    } else { initMap(28.6139,77.2090,'Simulated (New Delhi)'); }
+  }
+
+  // ── SOS ──
+  function triggerSOS() {
+    if (!currentUser.contacts||!currentUser.contacts.length)
+      return toast('No emergency contacts found. Please add them in setup.');
+    const names=currentUser.contacts.map(c=>c.name).join(', ');
+    toast(`🚨 SOS alert sent to: ${names} (simulated)`, 'danger');
+  }
+
+  // ── Toast ──
+  function toast(msg, type='normal') {
+    const d=document.createElement('div');
+    d.style.cssText=`position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+      background:${type==='danger'?'#b00020':'rgba(22,32,50,0.95)'};
+      color:#fff;padding:12px 22px;border-radius:40px;font-size:0.88rem;z-index:999;
+      box-shadow:0 8px 30px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.12);
+      white-space:nowrap; max-width:90vw; text-align:center;
+      animation:slideUp 0.3s ease both;`;
+    d.textContent=msg; document.body.appendChild(d);
+    setTimeout(()=>d.remove(),3500);
+  }
+
+  // init
+  loadUsers(); renderContacts(); showSection(authS);
+})();
+</script>
+</body>
+</html>
